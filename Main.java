@@ -3,9 +3,13 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.*;
-// import java.awt.Point;
 
-
+/**
+ * @author DGOAT
+ * Date Started: 11/26/20
+ * Date Finished: 
+ * Result: 
+ */
 public class Main
 {
     /** 

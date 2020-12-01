@@ -40,7 +40,6 @@ public class Main
      */
     static List<String> paths;
 
-
     /**
      * A class to represent a pad
      */
@@ -162,23 +161,52 @@ public class Main
     public static void definePads()
     {        
         // this will be for optimization
-        // Map<BigInteger, Set<BigInteger>> lookup = new HashMap<BigInteger, Set<BigInteger>>();
+        Map<List<BigInteger>, BigInteger> lookup = new HashMap<List<BigInteger>, BigInteger>();
         
         // instantiate all the needed static members
         minimal = new ArrayList<>();
         maximal = new ArrayList<>();
         both = new ArrayList<>();
 
+
         for (int i = 0; i < pads.size(); i++)
         {
             // make a pad out of the sorted list of numbers representing pads
             Pad temp = new Pad(pads.get(i), true, true, true);
+            List<BigInteger> key = null;
+            BigInteger gcd = null;
+            BigInteger min = null;
+            BigInteger max = null;
 
             // minimal? 
             for (int j = 0; j < i; j++)
             {
+                // create the key to place or lookup in the hashmap
+                min = temp.value.min(pads.get(j));
+                max = temp.value.max(pads.get(j));
+                key = Arrays.asList(min, max);
+
+                // calculated this before
+                if (lookup.containsKey(key))
+                {
+                    gcd = lookup.get(key);
+                    
+                    // not minimal
+                    if (!gcd.equals(BigInteger.ONE))
+                    {
+                        temp.min = false;
+                        break;
+                    }
+
+                }
+
+
+                // haven't calculated this before
+                gcd = gcd(pads.get(i), pads.get(j));
+                lookup.put(key, gcd);
+
                 // not minimal
-                if (!gcd(pads.get(i), pads.get(j)).equals(BigInteger.ONE))
+                if (!gcd.equals(BigInteger.ONE))
                 {
                     temp.min = false;
                     break;
@@ -188,8 +216,32 @@ public class Main
             // maximal?
             for (int k = i + 1; k < pads.size(); k++)
             {
+                // create the key to place or lookup in the hashmap
+                min = temp.value.min(pads.get(k));
+                max = temp.value.max(pads.get(k));
+                key = Arrays.asList(min, max);
+                 
+                // calculated this before
+                if (lookup.containsKey(key))
+                {
+                    gcd = lookup.get(key);
+                    
+                    // not minimal
+                    if (!gcd.equals(BigInteger.ONE))
+                    {
+                        temp.max = false;
+                        break;
+                    }
+
+                }
+
+
+                // haven't calculated this before
+                gcd = gcd(pads.get(i), pads.get(k));
+                lookup.put(key, gcd);
+
                 // not maximal
-                if (!gcd(pads.get(i), pads.get(k)).equals(BigInteger.ONE))
+                if (!gcd.equals(BigInteger.ONE))
                 {
                     temp.max = false;
                     break;
@@ -337,9 +389,9 @@ public class Main
     
     public static void main(String[] args)
     {
-        readInput("input.txt");
+        readInput("input (8).txt");
         definePads();
         getHobbitPaths();
-        writeOutput("output.txt");
+        writeOutput("o.txt");
     }
 }

@@ -1,3 +1,4 @@
+// Deron Washington II
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -7,7 +8,7 @@ import java.util.*;
 /**
  * @author DGOAT
  * Date Started: 11/26/20
- * Date Finished: 
+ * Date Finished: 11/28/20
  * Result: 
  */
 public class Main
@@ -134,6 +135,7 @@ public class Main
      */
     public static BigInteger gcd(BigInteger a, BigInteger b)
     {
+        // make sure the numbers are positive
         a = a.abs();
         b = b.abs();
       
@@ -160,7 +162,9 @@ public class Main
     public static void definePads()
     {        
         // this will be for optimization
-        Map<BigInteger, Set<BigInteger>> lookup = new HashMap<BigInteger, Set<BigInteger>>();
+        // Map<BigInteger, Set<BigInteger>> lookup = new HashMap<BigInteger, Set<BigInteger>>();
+        
+        // instantiate all the needed static members
         minimal = new ArrayList<>();
         maximal = new ArrayList<>();
         both = new ArrayList<>();
@@ -205,46 +209,6 @@ public class Main
                 maximal.add(temp.value);
 
         }
-
-
-
-        // for (int i = 0; i < pads.size(); i++)
-        // {
-
-        //      // add to hashset if not seen
-        //      if (!seen.contains(pads.get(i)))
-        //      {
-        //          seen.add(pads.get(i));
-        //          mp.add(pads.get(i));
-        //      }
-
-        //      else
-        //          continue;
-
-        //     for (int j = 1; j < tpads.size(); j++)
-        //     {
-        //         // determine the gcd
-        //         if (gcd(tpads.get(i), tpads.get(j)) != BigInteger.ONE)
-        //         {
-        //             // add to hashset if not seen
-        //             if (!seen.contains(tpads.get(j)))
-        //             {
-        //                 seen.add(tpads.get(j));
-        //                 mp.add(tpads.get(j));
-        //                 tpads.remove(j);
-        //                 j--;
-        //                 continue;                        
-        //             }
-        //         }
-
-        //     }
-            
-        //     minPads.add(mp);
-        //     mp.clear();
-        // }
-
-
-        // return null;
     }
 
 
@@ -259,12 +223,12 @@ public class Main
         // instantitate static member
         paths = new ArrayList<String>();
 
-    
-        // for both pads
+        // this is the string we will use for the path
+        // always starts at 1
         String temp = "1";
 
-        for (int i = 0; i < both.size(); i++)
-        {
+        // for both pads
+        for (int i = 0; i < both.size(); i++) {
             temp += " " + both.get(i);
             paths.add(temp);
             temp = "1";
@@ -273,26 +237,31 @@ public class Main
         // for maximal pads
         int min = 0;
         int max = 0;
-        do 
-        {
+        do {
             temp += " " + minimal.get(min) + " " + maximal.get(max);
             paths.add(temp);
+
+            if (minimal.get(min).compareTo(maximal.get(max)) > 0)
+            {
+                System.out.print("SOMETHING IS WRONG! Maximal is less than minimal! ");
+                System.exit(-1);
+            }
+
+
             min++;
             max++;
             temp = "1";
         } while (min < minimal.size() && max < maximal.size());
 
-
         // check if we have the maximal number of paths
-        if (paths.size() < Math.min(minimal.size(), maximal.size()) + both.size())
-        {
+        if (paths.size() < Math.min(minimal.size(), maximal.size()) + both.size()) {
             System.out.print("SOMETHING IS WRONG! THER ARE LESS PATHS THAN OPTIMAL! ");
             System.exit(-1);
-            
+
         }
 
-
     }
+    
 
 
     /**
@@ -309,31 +278,25 @@ public class Main
         // instanitate the static member representing our pads
         pads = new ArrayList<>();
 
-        try {
+        try 
+        {
             scan = new Scanner(inFile);
 
             // get the pad
             while (scan.hasNextLine())
                 pads.add(new BigInteger(scan.nextLine()));
-            // pads.add(new Pad(new BigInteger(scan.nextLine()), true));
 
             // sort the array
             Collections.sort(pads);
-            // List<Pad> pL = new ArrayList<Pad>(padsQ);
 
-            // the first pad will be minimal and last pad will be maximal automatically
-            // List<Pad> minimalPads =
-            //     p.parallelStream()
-            //      .map()
-            //      .;
-
-            // pads.get(0).min = true;
-            // pads.get(pads.size() - 1).max = true;
-
-        } catch (FileNotFoundException e) {
+        } 
+        catch (FileNotFoundException e) 
+        {
 
             e.printStackTrace();
-        } finally {
+        } 
+        finally 
+        {
             scan.close();
         }
 
@@ -351,16 +314,21 @@ public class Main
         File outFile = new File(outputName);
         PrintWriter writer = null;
 
-        try {
+        try 
+        {
             writer = new PrintWriter(outFile);
 
             // print out the paths
             for (String path : paths)
-                writer.println(path);
+                writer.println(path + " ");
 
-        } catch (FileNotFoundException e) {
+        } 
+        catch (FileNotFoundException e) 
+        {
             e.printStackTrace();
-        } finally {
+        } 
+        finally 
+        {
             writer.close();
         }
 
@@ -369,9 +337,9 @@ public class Main
     
     public static void main(String[] args)
     {
-        readInput("inputTest.txt");
+        readInput("input.txt");
         definePads();
         getHobbitPaths();
-        writeOutput("o.txt");
+        writeOutput("output.txt");
     }
 }

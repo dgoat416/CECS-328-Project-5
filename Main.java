@@ -19,6 +19,12 @@ public class Main
     static List<BigInteger> pads;
 
     /**
+     * contains all pads that are neither 
+     * minimal, maximal or both
+     */
+    static List<BigInteger> neither;
+
+    /**
      * contains all the minimal only pads
      */
     static List<BigInteger> minimal;
@@ -33,6 +39,12 @@ public class Main
      * and maximal
      */
     static List<BigInteger> both;
+
+    /**
+     * store previously calculated gcd elements 
+     * and gcds
+     */
+    static Map<List<BigInteger>, BigInteger> lookup;
     
     /** 
      * contains the path of each hobbit that 
@@ -159,16 +171,15 @@ public class Main
      * Method to determine if each pad is minimal, maximal, or both
      */
     public static void definePads()
-    {        
-        // this will be for optimization
-        Map<List<BigInteger>, BigInteger> lookup = new HashMap<List<BigInteger>, BigInteger>();
-        
+    {           
         // instantiate all the needed static members
+        lookup = new HashMap<List<BigInteger>, BigInteger>();
         minimal = new ArrayList<>();
         maximal = new ArrayList<>();
         both = new ArrayList<>();
+        neither = new ArrayList<>();
 
-
+        // for every pad in pad list determine if it is minimal, maximal, both or neither
         for (int i = 0; i < pads.size(); i++)
         {
             // make a pad out of the sorted list of numbers representing pads
@@ -200,7 +211,6 @@ public class Main
 
                 }
 
-
                 // haven't calculated this before
                 gcd = gcd(pads.get(i), pads.get(j));
                 lookup.put(key, gcd);
@@ -226,7 +236,7 @@ public class Main
                 {
                     gcd = lookup.get(key);
                     
-                    // not minimal
+                    // not maximal
                     if (!gcd.equals(BigInteger.ONE))
                     {
                         temp.max = false;
@@ -234,7 +244,6 @@ public class Main
                     }
 
                 }
-
 
                 // haven't calculated this before
                 gcd = gcd(pads.get(i), pads.get(k));
@@ -259,6 +268,10 @@ public class Main
             // only maximal pad
             else if (temp.max == true)
                 maximal.add(temp.value);
+
+            // none of the above    
+            else 
+                neither.add(temp.value);
 
         }
     }
@@ -286,9 +299,30 @@ public class Main
             temp = "1";
         }
 
-        // for maximal pads
+
+
+        // hop from 1 -> minimal pad -> find another pad where gcd(minimal pad, another pad) > 1 
+        // when looking for another pad search through maximal pads first then check neither pads
+        // until we reach a maximal pad
+
+        boolean maximalPadFound = false;
+        int numPaths = Math.min(minimal.size(), maximal.size()) + both.size();
         int min = 0;
         int max = 0;
+        StringBuilder path = new StringBuilder();
+        
+        // start from minimal pad and work towards a maximal pad
+        for (int i = 0; i < minimal.size(); i++)
+        {
+            while (!maximalPadFound)
+            {
+                
+            }
+
+            temp = "1";
+        }
+
+        // for maximal pads
         do {
             temp += " " + minimal.get(min) + " " + maximal.get(max);
             paths.add(temp);

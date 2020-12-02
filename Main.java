@@ -19,6 +19,16 @@ public class Main
     static List<BigInteger> pads;
 
     /**
+     * contains all pads in the order:
+     * maximal -> neither 
+     * where each number in the maximal/neither group
+     * are sorted in ascending order
+     */
+    static List<BigInteger> priorityPads;
+
+    // static Map<BigInteger
+
+    /**
      * contains all pads that are neither 
      * minimal, maximal or both
      */
@@ -171,7 +181,7 @@ public class Main
      * Method to determine if each pad is minimal, maximal, or both
      */
     public static void definePads()
-    {           
+    {
         // instantiate all the needed static members
         lookup = new HashMap<List<BigInteger>, BigInteger>();
         minimal = new ArrayList<>();
@@ -180,8 +190,7 @@ public class Main
         neither = new ArrayList<>();
 
         // for every pad in pad list determine if it is minimal, maximal, both or neither
-        for (int i = 0; i < pads.size(); i++)
-        {
+        for (int i = 0; i < pads.size(); i++) {
             // make a pad out of the sorted list of numbers representing pads
             Pad temp = new Pad(pads.get(i), true, true, true);
             List<BigInteger> key = null;
@@ -190,21 +199,18 @@ public class Main
             BigInteger max = null;
 
             // minimal? 
-            for (int j = 0; j < i; j++)
-            {
+            for (int j = 0; j < i; j++) {
                 // create the key to place or lookup in the hashmap
                 min = temp.value.min(pads.get(j));
                 max = temp.value.max(pads.get(j));
                 key = Arrays.asList(min, max);
 
                 // calculated this before
-                if (lookup.containsKey(key))
-                {
+                if (lookup.containsKey(key)) {
                     gcd = lookup.get(key);
-                    
+
                     // not minimal
-                    if (!gcd.equals(BigInteger.ONE))
-                    {
+                    if (!gcd.equals(BigInteger.ONE)) {
                         temp.min = false;
                         break;
                     }
@@ -216,29 +222,25 @@ public class Main
                 lookup.put(key, gcd);
 
                 // not minimal
-                if (!gcd.equals(BigInteger.ONE))
-                {
+                if (!gcd.equals(BigInteger.ONE)) {
                     temp.min = false;
                     break;
                 }
             }
-            
+
             // maximal?
-            for (int k = i + 1; k < pads.size(); k++)
-            {
+            for (int k = i + 1; k < pads.size(); k++) {
                 // create the key to place or lookup in the hashmap
                 min = temp.value.min(pads.get(k));
                 max = temp.value.max(pads.get(k));
                 key = Arrays.asList(min, max);
-                 
+
                 // calculated this before
-                if (lookup.containsKey(key))
-                {
+                if (lookup.containsKey(key)) {
                     gcd = lookup.get(key);
-                    
+
                     // not maximal
-                    if (!gcd.equals(BigInteger.ONE))
-                    {
+                    if (!gcd.equals(BigInteger.ONE)) {
                         temp.max = false;
                         break;
                     }
@@ -250,13 +252,12 @@ public class Main
                 lookup.put(key, gcd);
 
                 // not maximal
-                if (!gcd.equals(BigInteger.ONE))
-                {
+                if (!gcd.equals(BigInteger.ONE)) {
                     temp.max = false;
                     break;
-                 }
+                }
             }
-            
+
             // both min and maximal pad
             if (temp.min == true && temp.max == true)
                 both.add(temp.value);
@@ -270,10 +271,160 @@ public class Main
                 maximal.add(temp.value);
 
             // none of the above    
-            else 
+            else
                 neither.add(temp.value);
 
         }
+    }
+
+    /**
+     * Method to return the index of the specified value in the array
+     * if it exists
+     * @param arr = array to search for the value in
+     * @param data = data to find in the array
+     * @return the index where this number exists or -1 if it doesn't exist
+     */
+    public static int binarySearch(BigInteger[] arr, BigInteger data)
+    {
+        return binarySearch(arr, 0, arr.length - 1, data);
+    }
+
+     /**
+     * Method to find a specified value in a list
+     * @param arr an array to find the value in 
+     * @param data value to look for within the array
+     * @return the position in the array
+     */
+    private static int binarySearch(BigInteger[] arr, int low, int high, BigInteger data)
+    {
+        // low can't be greater than high
+        if (low > high || low < 0 || high >= arr.length)
+            return -1;
+
+        // if we only have an array of 2 elements just check the elements
+        else if (high - low == 1)
+        {
+            // high
+            if (arr[high].equals(data))
+                return high;
+
+            // low
+            else if (arr[low].equals(data))
+                return low;
+
+            else 
+                return -1;
+        }
+
+        // general case
+        int middle = (low + high) / 2;
+
+        if (arr[middle].equals(data))
+        {
+            return middle;
+        }
+
+        else
+        {
+            // left 
+            int left = binarySearch(arr, low, middle - 1, data);
+            
+            if (left != -1)
+                return left;
+
+            // right
+            int right = binarySearch(arr, middle + 1, high, data);
+            
+            if (right != -1)
+                return right;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Method to find compatible path (if it is available)
+     * @param b = the big integer value of the pad to find all compatible pads for
+     * @param index = index of pads that b can be found at
+     * @return = a list indicating the path from b to a maximal pad if it exists
+     * if there is a null anywhere in compatible list then disregard the whole list
+     */
+    public static List<BigInteger> findCompatiblePath(BigInteger b)
+    {
+        // all variable declarations to avoid repeat code
+        List<BigInteger> compatibleList = new ArrayList<BigInteger>();
+        BigInteger min = null;
+        BigInteger max = null;
+        BigInteger pad = null;
+        BigInteger gcd = null;
+        List<BigInteger> key = null;
+        
+        // get all compatible pads from this one to the next
+        for (int i = 0; i < priorityPads.size(); i++)
+        {
+            // calculate this once per iteration
+            pad = priorityPads.get(i);
+            
+            // if b >= pad disregard
+            if (b.compareTo(pad) >= 0)
+                continue;
+            
+            // get the correct order for the list
+            min = b.min(pad);
+            max = b.max(pad);
+            key = Arrays.asList(min, max);
+            
+            // calculated this before
+            if (lookup.containsKey(key))
+                gcd = lookup.get(key);
+                
+            // haven't calculated this before
+            else 
+            {
+                gcd = gcd(min, max);
+                lookup.put(key, gcd);
+            }
+                
+            // add to compatibleList if the gcd > 1
+            if (gcd.compareTo(BigInteger.ONE) > 0)
+            {
+                compatibleList.add(pad);
+
+                // not maximal pad? then we need to go deeper into recursion
+                if (!maximal.contains(pad))
+                    compatibleList.addAll(findCompatiblePath(pad));
+                
+                // return the compatible list
+                return compatibleList;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Method to return the path the hobbit must travel to get
+     * across the gorge
+     * @param b = the value of the path you are currently on
+     */
+    public static void findPath(BigInteger b)
+    {
+        // // find the index where this number is in pads
+        // int index = binarySearch(pads.toArray(new BigInteger[pads.size()]), b);
+
+        // List<BigInteger> compatiblePath = findCompatiblePath(b, index);
+        List<BigInteger> compatiblePath = findCompatiblePath(b);
+        StringBuilder path = new StringBuilder("1 " + b.toString() + " ");
+
+        for (BigInteger i : compatiblePath)
+        {
+            // add each pad to path and remove from pad pool
+            path.append(i.toString() + " ");
+            priorityPads.remove(i);
+        }
+
+         // add to our list of paths   
+        paths.add(path.toString());
     }
 
 
@@ -305,39 +456,53 @@ public class Main
         // when looking for another pad search through maximal pads first then check neither pads
         // until we reach a maximal pad
 
-        boolean maximalPadFound = false;
+        // boolean maximalPadFound = false;
         int numPaths = Math.min(minimal.size(), maximal.size()) + both.size();
         int min = 0;
         int max = 0;
         StringBuilder path = new StringBuilder();
+
+        // instantiate static member to prioritize the list
+        priorityPads = new ArrayList<BigInteger>();
+        priorityPads.addAll(maximal);
+        priorityPads.addAll(neither);
         
         // start from minimal pad and work towards a maximal pad
         for (int i = 0; i < minimal.size(); i++)
         {
-            while (!maximalPadFound)
-            {
-                
-            }
+            findPath(minimal.get(i));
 
-            temp = "1";
+            if (paths.size() == numPaths)
+            {
+                System.out.print("FOUND THE OPTIMAL NUMBER");
+                break;
+            }
+            // while (!maximalPadFound)
+            // {
+            //     // get a list of all pads that have a gcd greater than 1 
+            //     // and test them all out and see which one leads us to a 
+            //     // maximal pad
+            // }
+
+            // temp = "1";
         }
 
-        // for maximal pads
-        do {
-            temp += " " + minimal.get(min) + " " + maximal.get(max);
-            paths.add(temp);
+        // // for maximal pads
+        // do {
+        //     temp += " " + minimal.get(min) + " " + maximal.get(max);
+        //     paths.add(temp);
 
-            if (minimal.get(min).compareTo(maximal.get(max)) > 0)
-            {
-                System.out.print("SOMETHING IS WRONG! Maximal is less than minimal! ");
-                System.exit(-1);
-            }
+        //     if (minimal.get(min).compareTo(maximal.get(max)) > 0)
+        //     {
+        //         System.out.print("SOMETHING IS WRONG! Maximal is less than minimal! ");
+        //         System.exit(-1);
+        //     }
 
 
-            min++;
-            max++;
-            temp = "1";
-        } while (min < minimal.size() && max < maximal.size());
+        //     min++;
+        //     max++;
+        //     temp = "1";
+        // } while (min < minimal.size() && max < maximal.size());
 
         // check if we have the maximal number of paths
         if (paths.size() < Math.min(minimal.size(), maximal.size()) + both.size()) {
@@ -423,9 +588,9 @@ public class Main
     
     public static void main(String[] args)
     {
-        readInput("input (8).txt");
+        readInput("input.txt");
         definePads();
         getHobbitPaths();
-        writeOutput("o.txt");
+        writeOutput("output.txt");
     }
 }

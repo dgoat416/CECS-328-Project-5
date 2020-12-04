@@ -26,7 +26,12 @@ public class Main
      */
     static List<BigInteger> priorityPads;
 
-    // static Map<BigInteger
+    /**
+     * each key is a maximal pad and each set
+     * is the set of numbers that have gcd > 1 
+     * with the key including the key itself
+     */
+    static Map<BigInteger, Set<BigInteger>> maxPadGCDMap;
 
     /**
      * contains all pads that are neither 
@@ -402,6 +407,133 @@ public class Main
         return null;
     }
 
+
+    public static void createGcdSet4MaximalPads()
+    {
+        maxPadGCDMap = new HashMap<BigInteger, Set<BigInteger>>();
+
+        for (BigInteger maxPad : maximal) {
+            Set<BigInteger> ts = new TreeSet<>();
+            BigInteger min = null;
+            BigInteger max = null;
+
+            // find index in pads
+            // int index = binarySearch(pads.toArray(new BigInteger[0]), maxPad);
+
+            for (BigInteger b : pads) {
+                min = b.min(maxPad);
+                max = b.max(maxPad);
+
+                if (lookup.getOrDefault(Arrays.asList(min, max), gcd(min, max)).compareTo(BigInteger.ONE) > 0)
+                    ts.add(b);
+            }
+
+            maxPadGCDMap.put(maxPad, ts);
+        }
+
+    }
+
+    
+    public static void optimizePaths()
+    {
+        for (BigInteger max : maximal)
+        {
+            Set<BigInteger> set = maxPadGCDMap.get(max);
+            Iterator<BigInteger> itr = set.iterator();
+
+            while(itr.hasNext())
+            {
+                // does this iterator give me 
+                BigInteger a = itr.next();
+               
+                // delete the number from this list 
+                // if a.gcd > 1
+                if (lookup.getOrDefault(Arrays.asList(a, max), gcd(a, max)).compareTo(BigInteger.ONE) > 0)
+                {
+                    // get min and max of the set and find the next max using hashtable till I find a maximal pad
+                    
+
+                }
+
+                // if (itr.hasNext())
+                // {
+                //     b = itr.next();
+
+                //     if ()
+                // }
+
+            }
+        }
+    }
+
+        /**
+     * Method to find compatible path (if it is available)
+     * @param b = the big integer value of the pad to find all compatible pads for
+     * @param index = index of pads that b can be found at
+     * @return = a list indicating the path from b to a maximal pad if it exists
+     * if there is a null anywhere in compatible list then disregard the whole list
+     */
+    public static List<BigInteger> findOptCompatiblePath(BigInteger b)
+    {
+        // from my list if max pads create a set that has gcd > 1
+        createGcdSet4MaximalPads();
+
+
+
+
+
+        // all variable declarations to avoid repeat code
+        List<BigInteger> compatibleList = new ArrayList<BigInteger>();
+        BigInteger min = null;
+        BigInteger max = null;
+        BigInteger pad = null;
+        BigInteger gcd = null;
+        List<BigInteger> key = null;
+        
+        // get all compatible pads from this one to the next
+        for (int i = 0; i < priorityPads.size(); i++)
+        {
+            // calculate this once per iteration
+            pad = priorityPads.get(i);
+            
+            // if b >= pad disregard
+            if (b.compareTo(pad) >= 0)
+                continue;
+            
+            // get the correct order for the list
+            min = b.min(pad);
+            max = b.max(pad);
+            key = Arrays.asList(min, max);
+            
+            // calculated this before
+            if (lookup.containsKey(key))
+                gcd = lookup.get(key);
+                
+            // haven't calculated this before
+            else 
+            {
+                gcd = gcd(min, max);
+                lookup.put(key, gcd);
+            }
+                
+            // add to compatibleList if the gcd > 1
+            if (gcd.compareTo(BigInteger.ONE) > 0)
+            {
+                compatibleList.add(pad);
+
+                // not maximal pad? then we need to go deeper into recursion
+                if (!maximal.contains(pad))
+                    compatibleList.addAll(findCompatiblePath(pad));
+                
+                // return the compatible list
+                return compatibleList;
+            }
+        }
+
+        return null;
+    }
+
+
     /**
      * Method to return the path the hobbit must travel to get
      * across the gorge
@@ -441,13 +573,13 @@ public class Main
 
         // this is the string we will use for the path
         // always starts at 1
-        String temp = "1";
+        String temp = "1 ";
 
         // for both pads
         for (int i = 0; i < both.size(); i++) {
-            temp += " " + both.get(i);
+            temp += both.get(i) + " ";
             paths.add(temp);
-            temp = "1";
+            temp = "1 ";
         }
 
 
@@ -571,7 +703,7 @@ public class Main
 
             // print out the paths
             for (String path : paths)
-                writer.println(path + " ");
+                writer.println(path);
 
         } 
         catch (FileNotFoundException e) 
@@ -588,8 +720,9 @@ public class Main
     
     public static void main(String[] args)
     {
-        readInput("input.txt");
+        readInput("input (8).txt");
         definePads();
+        createGcdSet4MaximalPads();
         getHobbitPaths();
         writeOutput("output.txt");
     }

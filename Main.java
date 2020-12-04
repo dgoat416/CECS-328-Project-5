@@ -282,6 +282,7 @@ public class Main
         }
     }
 
+    
     /**
      * Method to return the index of the specified value in the array
      * if it exists
@@ -408,6 +409,11 @@ public class Main
     }
 
 
+    /**
+     * Method to create a hashmap of all numbers that 
+     * have a gcd greater than one with the key (a  maximal pad)
+     * including the key itself
+     */
     public static void createGcdSet4MaximalPads()
     {
         maxPadGCDMap = new HashMap<BigInteger, Set<BigInteger>>();
@@ -434,6 +440,10 @@ public class Main
     }
 
     
+    /**
+     * Method to optimize the path for the most 
+     * efficient use of pads
+     */
     public static void optimizePaths()
     {
         for (BigInteger max : maximal)
@@ -466,22 +476,14 @@ public class Main
         }
     }
 
-        /**
+    /**
      * Method to find compatible path (if it is available)
      * @param b = the big integer value of the pad to find all compatible pads for
-     * @param index = index of pads that b can be found at
      * @return = a list indicating the path from b to a maximal pad if it exists
      * if there is a null anywhere in compatible list then disregard the whole list
      */
     public static List<BigInteger> findOptCompatiblePath(BigInteger b)
     {
-        // from my list if max pads create a set that has gcd > 1
-        createGcdSet4MaximalPads();
-
-
-
-
-
         // all variable declarations to avoid repeat code
         List<BigInteger> compatibleList = new ArrayList<BigInteger>();
         BigInteger min = null;
@@ -523,7 +525,7 @@ public class Main
 
                 // not maximal pad? then we need to go deeper into recursion
                 if (!maximal.contains(pad))
-                    compatibleList.addAll(findCompatiblePath(pad));
+                    compatibleList.addAll(findOptCompatiblePath(pad));
                 
                 // return the compatible list
                 return compatibleList;
@@ -545,7 +547,7 @@ public class Main
         // int index = binarySearch(pads.toArray(new BigInteger[pads.size()]), b);
 
         // List<BigInteger> compatiblePath = findCompatiblePath(b, index);
-        List<BigInteger> compatiblePath = findCompatiblePath(b);
+        List<BigInteger> compatiblePath = findOptCompatiblePath(b);
         StringBuilder path = new StringBuilder("1 " + b.toString() + " ");
 
         for (BigInteger i : compatiblePath)
@@ -587,12 +589,10 @@ public class Main
         // hop from 1 -> minimal pad -> find another pad where gcd(minimal pad, another pad) > 1 
         // when looking for another pad search through maximal pads first then check neither pads
         // until we reach a maximal pad
-
-        // boolean maximalPadFound = false;
         int numPaths = Math.min(minimal.size(), maximal.size()) + both.size();
-        int min = 0;
-        int max = 0;
-        StringBuilder path = new StringBuilder();
+
+        // from my list if max pads create a set that has gcd > 1
+        createGcdSet4MaximalPads();
 
         // instantiate static member to prioritize the list
         priorityPads = new ArrayList<BigInteger>();
@@ -619,23 +619,7 @@ public class Main
             // temp = "1";
         }
 
-        // // for maximal pads
-        // do {
-        //     temp += " " + minimal.get(min) + " " + maximal.get(max);
-        //     paths.add(temp);
-
-        //     if (minimal.get(min).compareTo(maximal.get(max)) > 0)
-        //     {
-        //         System.out.print("SOMETHING IS WRONG! Maximal is less than minimal! ");
-        //         System.exit(-1);
-        //     }
-
-
-        //     min++;
-        //     max++;
-        //     temp = "1";
-        // } while (min < minimal.size() && max < maximal.size());
-
+       
         // check if we have the maximal number of paths
         if (paths.size() < Math.min(minimal.size(), maximal.size()) + both.size()) {
             System.out.print("SOMETHING IS WRONG! THER ARE LESS PATHS THAN OPTIMAL! ");
@@ -697,33 +681,79 @@ public class Main
         File outFile = new File(outputName);
         PrintWriter writer = null;
 
-        try 
-        {
+        try {
             writer = new PrintWriter(outFile);
 
             // print out the paths
             for (String path : paths)
                 writer.println(path);
 
-        } 
-        catch (FileNotFoundException e) 
-        {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } 
-        finally 
-        {
+        } finally {
             writer.close();
         }
 
     }
 
     
+    public static boolean validPaths()
+    {
+        // check if each pad is valid
+        for (String path : paths)
+        {
+            // separate path by space
+            List<String> pathPads = Arrays.asList(path.split(" "));
+            BigInteger min = null;
+            BigInteger max = null;
+            
+            // (0th pad is always 1) first pad must be a minimal pad
+            if (!minimal.contains(new BigInteger(pathPads.get(1).strip()))
+            && !both.contains(new BigInteger(pathPads.get(1).strip())))
+                return false;
+
+            // last pad must be maximal
+            if (!maximal.contains(new BigInteger(pathPads.get(pathPads.size() - 1).strip()))
+            && !both.contains(new BigInteger(pathPads.get(1).strip())))
+                return false;
+
+            // all middle pads must have gcd > 1
+            for (int i = 2; i < pathPads.size(); i++)
+            {
+                BigInteger a = new BigInteger(pathPads.get(i - 1).strip());
+                BigInteger b = new BigInteger(pathPads.get(i).strip());
+                min = a.min(b);
+                max = a.max(b);
+
+                // calculated this before
+                if (lookup.getOrDefault(Arrays.asList(min, max), gcd(min, max)).equals(BigInteger.ONE))
+                    return false;
+            }
+        }
+
+
+        return true;
+    }
+    
     public static void main(String[] args)
     {
-        readInput("input (8).txt");
+        readInput("input.txt");
         definePads();
-        createGcdSet4MaximalPads();
         getHobbitPaths();
+
+        if (validPaths() == false)
+        {
+            System.out.print("HOUSTON WE HAVE A PROBLEM");
+            System.exit(-1);
+        }
+        
         writeOutput("output.txt");
     }
 }
+
+// FIND COMPATIBLE PATH (OR FIND PATH)
+// needs to be modified to ensure that the path returned
+// ends at a maximal pad otherwise the whole path
+// is discarded and the set of numbers that were deleted
+// are either returned or not deleted at all (delete 
+// all pads that were used in the path at the end)

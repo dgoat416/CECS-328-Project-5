@@ -67,6 +67,25 @@ public class Main
     static List<String> paths;
 
     /**
+     * Default Constructor to instantiate all needed
+     * static members
+     */
+    private static void init()
+    {
+        // instantiate all the needed static members
+        pads = new ArrayList<>();
+        lookup = new HashMap<List<BigInteger>, BigInteger>();
+        minimal = new ArrayList<>();
+        maximal = new ArrayList<>();
+        both = new ArrayList<>();
+        neither = new ArrayList<>();
+        priorityPads = new ArrayList<BigInteger>();
+        paths = new ArrayList<String>();
+        maxPadGCDMap = new HashMap<BigInteger, Set<BigInteger>>();
+    }
+
+
+    /**
      * A class to represent a pad
      */
     public static class Pad implements Comparable<Pad>
@@ -186,13 +205,6 @@ public class Main
      */
     public static void definePads()
     {
-        // instantiate all the needed static members
-        lookup = new HashMap<List<BigInteger>, BigInteger>();
-        minimal = new ArrayList<>();
-        maximal = new ArrayList<>();
-        both = new ArrayList<>();
-        neither = new ArrayList<>();
-
         // for every pad in pad list determine if it is minimal, maximal, both or neither
         for (int i = 0; i < pads.size(); i++) 
         {
@@ -298,8 +310,6 @@ public class Main
      */
     public static void createGcdSet4MaximalPads()
     {
-        maxPadGCDMap = new HashMap<BigInteger, Set<BigInteger>>();
-
         // for each pad
         for (BigInteger maxPad : maximal) 
         {
@@ -415,9 +425,6 @@ public class Main
      */
     public static void getHobbitPaths()
     {
-        // instantitate static member
-        paths = new ArrayList<String>();
-
         // this is the string we will use for the path
         // always starts at 1
         String temp = "1 ";
@@ -436,8 +443,7 @@ public class Main
         // from my list if max pads create a set that has gcd > 1
         createGcdSet4MaximalPads();
 
-        // instantiate static member to prioritize the list
-        priorityPads = new ArrayList<BigInteger>();
+        // create a priority list
         priorityPads.addAll(maximal);
         priorityPads.addAll(neither);
         
@@ -475,9 +481,6 @@ public class Main
         // Read input from file
         File inFile = new File(fileName);
         Scanner scan = null;
-
-        // instanitate the static member representing our pads
-        pads = new ArrayList<>();
 
         try 
         {
@@ -544,7 +547,7 @@ public class Main
      * - can only jump to a minimal pad from start (1)
      * - must end at a maximal pad
      * - each pad you jump to must be greater than the previous
-     *   pad you were on and must share a gcd largerthan 1
+     *   pad you were on and must share a gcd larger than 1
      * @return true if the paths follow all of the rules above
      *         false otherwise
      */
@@ -591,7 +594,7 @@ public class Main
      */
     public static void getHobbitsAcrossTheGorge()
     {
-        readInput("input.txt");
+        readInput("inputTest.txt");
         definePads();
         getHobbitPaths();
 
@@ -601,11 +604,12 @@ public class Main
             System.exit(-1);
         }
         
-        writeOutput("output.txt");
+        writeOutput("o.txt");
     }
 
     public static void main(String[] args)
     {
+        init();
         getHobbitsAcrossTheGorge();
     }
 }

@@ -457,15 +457,12 @@ public class Main
                 System.out.print("FOUND THE OPTIMAL NUMBER");
                 break;
             }
-        }
 
-       
-        // check if we have the maximal number of paths
-        if (paths.size() < Math.min(minimal.size(), maximal.size()) + both.size()) 
-        {
-            System.out.print("SOMETHING IS WRONG! THER ARE LESS PATHS THAN OPTIMAL! ");
-            System.exit(-1);
-
+            else
+            {
+                System.out.print("SOMETHING IS WRONG! THER ARE LESS PATHS THAN OPTIMAL! ");
+                System.exit(-1);                    
+            }
         }
 
     }
@@ -594,7 +591,7 @@ public class Main
      */
     public static void getHobbitsAcrossTheGorge()
     {
-        readInput("inputTest.txt");
+        readInput("input.txt");
         definePads();
         getHobbitPaths();
 
@@ -604,7 +601,7 @@ public class Main
             System.exit(-1);
         }
         
-        writeOutput("o.txt");
+        writeOutput("output.txt");
     }
 
     public static void main(String[] args)

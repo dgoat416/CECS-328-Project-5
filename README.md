@@ -1,2 +1,2 @@
-# CECS 328 Project 5
+#Hobbits
  Maximize the number of Hobbits that make it across the gorge
